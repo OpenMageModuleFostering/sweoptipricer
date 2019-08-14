@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * @category    SWE
+ * @package     swe
+ * @copyright   Copyright (c) 2009 Irubin Consulting Inc. DBA Varien (http://www.varien.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <SWE_Optipricer>
+            <version>1.0.0</version>
+        </SWE_Optipricer>
+    </modules>
+    <global>
+        <helpers>
+            <optipricer>
+                <class>SWE_Optipricer_Helper</class>
+            </optipricer>
+        </helpers>
+        <blocks>
+             <optipricer>
+                <class>SWE_Optipricer_Block</class>
+             </optipricer>
+        </blocks>
+        <models>
+             <optipricer>
+                <class>SWE_Optipricer_Model</class>
+             </optipricer>
+        </models>
+    </global>
+    <frontend>
+        <events>
+            <checkout_controller_onepage_save_shipping_method>
+                <observers>
+                    <swe_optipricer_observer>
+                        <type>singleton</type>
+                        <class>optipricer/observer</class>
+                        <method>validateCart</method>
+                    </swe_optipricer_observer>
+                </observers>
+            </checkout_controller_onepage_save_shipping_method>
+            <controller_action_predispatch_checkout_cart_index>
+                <observers>
+                    <swe_optipricer_observer>
+                        <type>singleton</type>
+                        <class>optipricer/observer</class>
+                        <method>validateCart</method>
+                    </swe_optipricer_observer>
+                </observers>
+            </controller_action_predispatch_checkout_cart_index>
+            <sales_order_save_before>
+                <observers>
+                    <swe_optipricer_observer>
+                        <type>singleton</type>
+                        <class>optipricer/observer</class>
+                        <method>sendOrderStatus</method>
+                    </swe_optipricer_observer>
+                </observers>
+            </sales_order_save_before>
+        </events>
+        <translate>
+            <modules>
+                <SWE_Optipricer>
+                    <files>
+                        <default>SWE_Optipricer.csv</default>
+                    </files>
+                </SWE_Optipricer>
+            </modules>
+        </translate>
+    </frontend>
+    <default>
+        <swe>
+            <swe_group_activation>
+                <swe_endpoint>https://lh.optipricer.com:4437/api/</swe_endpoint>
+                <swe_enable>1</swe_enable>
+            </swe_group_activation>
+            <swe_group_parameters>
+                <swe_pageview>1</swe_pageview>
+                <swe_renderview>0</swe_renderview>
+                <swe_expiryoffset>2880</swe_expiryoffset>
+                <swe_min>5</swe_min>
+                <swe_max>30</swe_max>
+                <swe_background_color>660066</swe_background_color>
+                <swe_font_color>FFFFFF</swe_font_color>
+            </swe_group_parameters>
+        </swe>
+    </default>
+    <adminhtml>
+        <acl>
+            <resources>
+                <all>
+                    <title>Allow Everything</title>
+                </all>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <swe>
+                                            <title>SWE - All</title>
+                                        </swe>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+                </admin>
+            </resources>
+        </acl>
+        <translate>
+            <modules>
+                <SWE_Optipricer>
+                    <files>
+                        <default>SWE_Optipricer.csv</default>
+                    </files>
+                </SWE_Optipricer>
+            </modules>
+        </translate>
+    </adminhtml>
+</config>

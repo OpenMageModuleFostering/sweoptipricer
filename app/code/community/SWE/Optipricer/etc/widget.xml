@@ -1,20 +1,19 @@
 <?xml version="1.0"?>
+<!--
+/**
+ * Widget to share the product in Facebook and get a personalized discount
+ *
+ * @package   SWE_Optipricer
+ * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
+ * @copyright 2015 be.ubi
+ * @license   GNU Lesser General Public License (LGPL)
+ * @version   v.0.1.1
+ */
+-->
 <widgets>
     <optipricer_discount type="optipricer/discount" translate="Optipricer Discount" module="optipricer">
         <name>Optipricer Discount</name>
-
         <description>Get a personalized discount</description>
-
-        <!-- Additional javascript files to be loaded
-            on the widget configuration edit form if needed. -->
-        <!--<js>mage/adminhtml/first.js,mage/adminhtml/second.js</js>-->
-
-        <!--
-            It should contain comma separated list
-            of javascript files paths under the /js directory.
-            This tag is optional.
-        -->
-
         <parameters>
             <enable_service translate="label">
                 <label>Enable Service</label>
@@ -28,14 +27,13 @@
                 <label>Font color (Button)</label>
                 <visible>1</visible>
                 <type>text</type>
-                <description>If empty, the color FFFFFF (white) will be used</description>
+                <description>By default, the color FFFFFF (white) will be used</description>
             </swe_font_color>
             <swe_background_color translate="label">
                 <label>Background color (Button)</label>
                 <visible>1</visible>
                 <type>text</type>
-              <!--  <value>5D2D87</value> -->
-                <description>If empty, the color 660066 (purple) will be used</description>
+                <description>By default, the color 660066 (purple) will be used</description>
             </swe_background_color>
             <swe_expiryoffset translate="label">
                 <label>Expiry Offset (in minutes)</label>

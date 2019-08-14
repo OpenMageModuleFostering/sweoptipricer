@@ -3,11 +3,11 @@
   <modules>
     <SWE_Optipricer>
       <active>true</active>
-      <codePool>local</codePool>
+      <codePool>community</codePool>
         <depends>
             <Mage_Cms />
         </depends>
-      <version>1.0.0</version>
+      <version>0.1.2</version>
     </SWE_Optipricer>
   </modules>
 </config>

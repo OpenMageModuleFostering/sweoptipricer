@@ -4,31 +4,75 @@
  *
  * @package   SWE_Optipricer
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
- * @copyright 2014 be.ubi
+ * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.2
+ * @version   v.0.1.1
  */
 class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements Mage_Widget_Block_Interface
 {
     /**
-     * A model to serialize attributes
-     * @var Varien_Object
+     * @var String Token Store
      */
-    protected $_serializer = null;
-
     private $token;
+
+    /**
+     * @var String Encrypt Key
+     */
     private $key;
+
+    /**
+     * @var bool EnabledGlobal flag
+     */
     private $enabledGlobal;
+
+    /**
+     * @var bool EnabledLocal flag
+     */
     private $enabledLocal;
+
+    /**
+     * @var Int Minimum Discount
+     */
     private $minDiscount;
+
+    /**
+     * @var Int Maximum Discount
+     */
     private $maxDiscount;
-    private $text;
+
+    /**
+     * @var String EndPoint
+     */
     private $endPoint;
+
+    /**
+     * @var bool PageView flag
+     */
     private $pageView;
+
+    /**
+     * @var bool RenderView flag
+     */
     private $renderView;
+
+    /**
+     * @var String Locale
+     */
     private $locale;
+
+    /**
+     * @var Int Expiry Offset time (minutes)
+     */
     private $expiryOffset;
+
+    /**
+     * @var String Background Color of the Button
+     */
     private $backgroundColor;
+
+    /**
+     * @var String Font Color of the Button
+     */
     private $colorFont;
 
     const HTTP_OK = 200;
@@ -36,7 +80,9 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
     const URL_ENDPOINT_PAGEVIEW = 'pageview';
 
     /**
-     * Initialization
+     * Initialization command
+     *
+     * @return void
      */
     protected function _construct()
     {
@@ -46,17 +92,20 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         $this->enabledGlobal   = Mage::getStoreConfig('swe/swe_group_activation/swe_enable', Mage::app()->getStore());
         $this->minDiscount     = Mage::getStoreConfig('swe/swe_group_parameters/swe_min', Mage::app()->getStore());
         $this->maxDiscount     = Mage::getStoreConfig('swe/swe_group_parameters/swe_max', Mage::app()->getStore());
-        $this->text            = '';
         $this->pageView        = Mage::getStoreConfig('swe/swe_group_parameters/swe_pageview', Mage::app()->getStore());
         $this->renderView      = Mage::getStoreConfig('swe/swe_group_parameters/swe_renderview', Mage::app()->getStore());
         $this->expiryOffset    = Mage::getStoreConfig('swe/swe_group_parameters/swe_expiryoffset', Mage::app()->getStore());
         $this->backgroundColor = Mage::getStoreConfig('swe/swe_group_parameters/swe_background_color', Mage::app()->getStore());
         $this->colorFont       = Mage::getStoreConfig('swe/swe_group_parameters/swe_font_color', Mage::app()->getStore());
         $this->locale          = Mage::app()->getLocale()->getLocaleCode();
-        $this->_serializer     = new Varien_Object();
         parent::_construct();
     }
 
+    /**
+     * Prepare Layout
+     *
+     * @return void
+     */
     protected function _prepareLayout() {
         $this->getLayout()->getBlock('head')->addJs('swe/optipricer.min.js');
         $this->getLayout()->getBlock('head')->addJs('swe/optispin.min.js');
@@ -64,7 +113,7 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
     }
 
     /**
-     * Produces links list html
+     * Produces the widget html
      *
      * @return string
      */
@@ -72,12 +121,8 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
     {
         $this->loadLocalParameters();
 
-        //ToDo: remove Debug
-        $this->printDebug(false);
-
         $result = $html = '';
-        //Global parameter of the service ($enabled)
-        if (!$this->enabledGlobal || !$this->enabledLocal || !$this->token || !$this->key) {
+        if (!$this->enabledGlobal || !$this->enabledLocal) {
             return $html;
         }
 
@@ -85,16 +130,14 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         $data = $this->getProductDetails();
         $data['min'] = $this->minDiscount;
         $data['max'] = $this->maxDiscount;
-        $data['text'] = $this->text;
+        $data['text'] = '';
         $data['discount_render'] = $this->renderView;
         $data['expiry_offset'] = $this->expiryOffset;
-        //ToDo: get FacebookId if exists any info about it
         $data['social_credentials'] = array('facebookId' => '', 'facebookToken' => '');
-
         $securedData['data'] = $this->secureContent(json_encode($data));
         $securedData['social_credentials'] = $data['social_credentials'];
 
-        //Check if pageView parameter is enabled
+        //PageView feature
         if ($this->pageView) {
             $result = $this->updatePageView($securedData, $this->renderView);
         }
@@ -132,6 +175,14 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         return parent::_toHtml();
     }
 
+    /**
+     * Update Page View feature
+     *
+     * @param String $data       Data
+     * @param Bool   $renderView RenderView flag
+     *
+     * @return mixed
+     */
     private function updatePageView($data, $renderView = false)
     {
         $uriPageView = $this->endPoint.self::URL_ENDPOINT_PAGEVIEW;
@@ -147,6 +198,16 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         return $response;
     }
 
+    /**
+     * Request execution
+     *
+     * @param String $uri     URL endpoint
+     * @param String $method  Method
+     * @param Array  $headers Headers
+     * @param String $rawData Raw Data
+     *
+     * @return mixed
+     */
     private function executeApiRequest($uri, $method, $headers = array(), $rawData = '')
     {
         $curl = curl_init();
@@ -171,7 +232,6 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         $content = curl_exec($curl);
         if(curl_errno($curl)) {
             curl_close($curl);
-            //ToDo: send an email to alert the error
             return false;
         }
         $info = curl_getinfo($curl);
@@ -179,17 +239,24 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         $result['content'] = $content;
         // Close request to clear up some resources
         curl_close($curl);
+
         return $result;
     }
 
+    /**
+     * get Product details
+     *
+     * @return array
+     */
     private function getProductDetails()
     {
         $product = Mage::registry('current_product');
+        $price   = $product->getFinalPrice();;
         $productDetails                    = array();
         $productDetails['product_id']      = $product->getId();
         $productDetails['name']            = $product->getName();
         $productDetails['description']     = $product->description;
-        $productDetails['price']           = $product->getPrice();
+        $productDetails['price']           = $price;
         $productDetails['product_barcode'] = $product->getBarcode();
         $productDetails['image_url']       = $product->getImageUrl();
         $productDetails['link']            = $product->getProductUrl();
@@ -204,14 +271,19 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
             }
         }
         $productDetails['categories']      = $categoriesAux;
-        $currentCurrencyCode               = Mage::app()->getStore()->getCurrentCurrencyCode();
+        $currentCurrencyCode               = Mage::app()->getStore()->getBaseCurrencyCode();
         $currentCurrencySymbol             = Mage::app()->getLocale()->currency($currentCurrencyCode)->getSymbol();
         $productDetails['currency']        = $currentCurrencySymbol;
-        $productDetails['formatted_price'] = Mage::helper('core')->formatPrice($product->getPrice(), false);
+        $productDetails['formatted_price'] = Mage::helper('core')->formatPrice($price, false);
 
         return $productDetails;
     }
 
+    /**
+     * Load Local Parameters of the Widget
+     *
+     * @return void
+     */
     private function loadLocalParameters()
     {
         $this->enabledLocal    = $this->getData('enable_service');
@@ -241,6 +313,14 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         }
     }
 
+    /**
+     * Method to secure content
+     *
+     * @param String $content Content
+     * @param String $task    Task to be done
+     *
+     * @return String
+     */
     private function secureContent($content, $task = 'encrypt')
     {
         if ($task == 'decrypt') {
@@ -293,28 +373,5 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         ));
 
         return $content;
-    }
-
-    //ToDo: remove
-    private function printDebug($debug) {
-        /*************** ToDo: remove *************/
-        if ($debug) {
-            echo "<br />--------- DEBUG -------<br/>";
-            echo "<b>Enabled Global</b>: ".$this->enabledGlobal;
-            echo "<br /><b>Enabled Local</b>: ".$this->enabledLocal;
-            echo "<br /><b>EndPoint</b>: ".$this->endPoint;
-            echo "<br /><b>Token</b>: ".$this->token;
-            echo "<br /><b>Key</b>: ".$this->key;
-            echo "<br /><b>Min</b>: ".$this->minDiscount;
-            echo "<br /><b>Max</b>: ".$this->maxDiscount;
-            echo "<br /><b>PageView</b>: ".$this->pageView;
-            echo "<br /><b>renderView</b>: ".$this->renderView;
-            echo "<br /><b>ExpiryOffset</b>: ".$this->expiryOffset;
-            echo "<br /><b>Locale</b>: ".$this->locale;
-            echo "<br /><b>ColorFont</b>: ".$this->colorFont;
-            echo "<br /><b>Background Color</b>: ".$this->backgroundColor;
-            echo "<br />-------- END DEBUG -----<br /><br />";
-        }
-        /*************** ToDo: remove *************/
     }
 }

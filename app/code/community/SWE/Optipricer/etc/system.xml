@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Widget to share the product in Facebook and get a personalized discount
+ *
+ * @package   SWE_Optipricer
+ * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
+ * @copyright 2015 be.ubi
+ * @license   GNU Lesser General Public License (LGPL)
+ * @version   v.0.1.1
+ */
+-->
 <config>
     <tabs>
         <swe translate="label" module="optipricer">
@@ -63,6 +74,7 @@
                             <label>Store Token </label>
                             <comment>Store Token (given by be.ubi)</comment>
                             <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
                             <sort_order>24</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -72,6 +84,7 @@
                             <label>Store Key </label>
                             <comment>Key for encrypt/decrypt data (given by be.ubi)</comment>
                             <frontend_type>text</frontend_type>
+                            <validate>required-entry</validate>
                             <sort_order>30</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
@@ -155,7 +168,7 @@
                         </swe_renderview>
                         <swe_background_color translate="label">
                             <label>Background color (Button)</label>
-                            <comment>If empty, the color 660066 (purple) will be used</comment>
+                            <comment>By default, the color 660066 (purple) will be used</comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>
@@ -164,7 +177,7 @@
                         </swe_background_color>
                         <swe_font_color translate="label">
                             <label>Font color (Button)</label>
-                            <comment>If empty, the color FFFFFF (white) will be used</comment>
+                            <comment>By default, the color FFFFFF (white) will be used</comment>
                             <frontend_type>text</frontend_type>
                             <sort_order>110</sort_order>
                             <show_in_default>1</show_in_default>

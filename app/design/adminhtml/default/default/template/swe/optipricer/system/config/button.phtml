@@ -1,0 +1,48 @@
+<script type="text/javascript">
+    //<![CDATA[
+    function check() {
+        var validateEmail = Validation.validate(document.getElementById("swe_swe_group_activation_swe_email"));
+        var validateName = Validation.validate(document.getElementById("swe_swe_group_activation_swe_name"));
+        var url = '<?php echo $this->getAjaxCheckUrl(); ?>';
+        if (validateEmail && validateName && url.indexOf('optipricer') !== -1) {
+            var xhr = new XMLHttpRequest();
+            var alerted = false;
+            var name = document.getElementById("swe_swe_group_activation_swe_name").value;
+            var email = document.getElementById("swe_swe_group_activation_swe_email").value;
+            var message = document.getElementById("swe_swe_group_activation_swe_message").value;
+            var params = '{"name":"'+name+'", "email": "'+email+'", "observation": "'+message+'"}';
+            xhr.open('POST', encodeURI(url), true);
+            xhr.onreadystatechange = function() {
+                if (xhr.status != 200 && xhr.responseText) {
+                    if (!alerted) {
+                        var msg;
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.errorCode === 2) {
+                                msg = 'Name and/or Email are invalid!';
+                            } else {
+                                msg = response.message;
+                            }
+                        } catch (e) {
+                            msg = 'Something went wrong. Please, contact admin!';
+                        }
+                        alert(msg);
+                    }
+                    alerted = true;
+                } else if(xhr.responseText) {
+                    if (!alerted) {
+                        alert(xhr.responseText);
+                    }
+                    alerted = true;
+                }
+            };
+            if (params !== null) {
+                xhr.send(params);
+            }
+        } else {
+            alert('Something went wrong. Please, contact admin!');
+        }
+    }
+    //]]>
+</script>
+<?php echo $this->getButtonHtml() ?>

@@ -4,16 +4,18 @@
  *
  * @package   SWE_Optipricer
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
- * @copyright 2014 be.ubi
+ * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.2
+ * @version   v.0.1.1
  */
 class SWE_Optipricer_Block_Button extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     const URL_ENDPOINT_CONTACT = 'contact/email';
 
     /**
-     * Set template
+     * Construct command
+     *
+     * @return void
      */
     protected function _construct()
     {
@@ -24,8 +26,9 @@ class SWE_Optipricer_Block_Button extends Mage_Adminhtml_Block_System_Config_For
     /**
      * Return element html
      *
-     * @param  Varien_Data_Form_Element_Abstract $element
-     * @return string
+     * @param  Varien_Data_Form_Element_Abstract $element Element
+     *
+     * @return String
      */
     protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
     {
@@ -35,19 +38,20 @@ class SWE_Optipricer_Block_Button extends Mage_Adminhtml_Block_System_Config_For
     /**
      * Return ajax url for button
      *
-     * @return string
+     * @return String
      */
     public function getAjaxCheckUrl()
     {
         $endPoint = Mage::getStoreConfig('swe/swe_group_activation/swe_endpoint', Mage::app()->getStore());
         $uriPageView = $endPoint.self::URL_ENDPOINT_CONTACT;
+
         return $uriPageView;
     }
 
     /**
      * Generate button html
      *
-     * @return string
+     * @return String
      */
     public function getButtonHtml()
     {
