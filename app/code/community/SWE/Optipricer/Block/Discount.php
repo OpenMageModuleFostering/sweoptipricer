@@ -6,7 +6,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.1
+ * @version   v.0.1.2
  */
 class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements Mage_Widget_Block_Interface
 {

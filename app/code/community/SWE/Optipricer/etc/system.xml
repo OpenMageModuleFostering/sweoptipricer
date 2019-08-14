@@ -7,13 +7,13 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.1
+ * @version   v.0.1.2
  */
 -->
 <config>
     <tabs>
         <swe translate="label" module="optipricer">
-            <label>SWE - Optipricer</label>
+            <label><![CDATA[<img height="16" width="16" style="vertical-align: top;" src="http://optipricer.com/favicon.ico" />&nbsp;SWE - Optipricer]]></label>
             <sort_order>100</sort_order>
         </swe>
     </tabs>

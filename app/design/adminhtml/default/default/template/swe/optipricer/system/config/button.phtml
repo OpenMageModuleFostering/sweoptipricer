@@ -10,6 +10,8 @@
             var name = document.getElementById("swe_swe_group_activation_swe_name").value;
             var email = document.getElementById("swe_swe_group_activation_swe_email").value;
             var message = document.getElementById("swe_swe_group_activation_swe_message").value;
+            var ip = "<?php echo $_SERVER['SERVER_ADDR']; ?>";
+            message = '<MAGENTO CONTACT> \n IP:' + ip +'\n' + message;
             var params = '{"name":"'+name+'", "email": "'+email+'", "observation": "'+message+'"}';
             xhr.open('POST', encodeURI(url), true);
             xhr.onreadystatechange = function() {

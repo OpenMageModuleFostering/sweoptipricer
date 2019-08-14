@@ -7,7 +7,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.1
+ * @version   v.0.1.2
  */
 -->
 <config>
@@ -76,7 +76,7 @@
     <default>
         <swe>
             <swe_group_activation>
-                <swe_endpoint>http://www.optipricer.com/api/</swe_endpoint>
+                <swe_endpoint>http://lh.optipricer.com:4437/api/</swe_endpoint>
                 <swe_enable>0</swe_enable>
             </swe_group_activation>
             <swe_group_parameters>

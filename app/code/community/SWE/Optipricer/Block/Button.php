@@ -6,7 +6,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.1
+ * @version   v.0.1.2
  */
 class SWE_Optipricer_Block_Button extends Mage_Adminhtml_Block_System_Config_Form_Field
 {

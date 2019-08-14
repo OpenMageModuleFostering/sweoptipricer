@@ -7,7 +7,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.1
+ * @version   v.0.1.2
  */
 class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
 {
@@ -17,6 +17,7 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
     const URL_SEPARATOR         = '/';
     const SWE_CUSTOM_OPTION_KEY = 'SWE_Optipricer_Coupon';
     const LOG_KEY               = 'OPTIPRICER# ';
+    const COOKIE_PREFIX         = 'swe_';
 
     /**
      * @var String Token
@@ -191,21 +192,21 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
         $error = null;
         try{
             $product = $item->getProduct();
-            $productId = $item->getProductId();
+            $productId = $product->getId();
             //Check if ProductId is in Session Checkout (SWE_Optipricer_Coupon_ID)
             $sessionKey = self::SWE_CUSTOM_OPTION_KEY.'_'.$productId;
             if ($prodSessionItems) {
                 //Validate Session Parameters matching with the Cookie
-                list($item, $error) = $this->validateSessionParamsWithCookie($item, $prodSessionItems,$sessionKey);
+                list($item, $error) = $this->validateSessionParamsWithCookie($item, $prodSessionItems, $sessionKey);
             } else {
                 if ($cart && $this->hasCookie($this->token, $productId)) {
                     // Optipricer discount was activated and this is the first time adding to the cart
                     $cookieParams = $this->getCookieParams($this->token, $productId);
-                    if (count($cookieParams)) {
+                    if (count($cookieParams) && $cookieParams['productId'] == $productId) {
                         $item = $this->changeItemPrice($item, $product->getFinalPrice(), $cookieParams['finalPrice']);
                         $item = $this->createSessionParameter($item);
                     } else {
-                        $this->removeCookie('discount_'.$this->token.'_'.$productId);
+                        $this->removeCookie(self::COOKIE_PREFIX.$this->token.'_'.$productId);
                     }
                 }
             }
@@ -213,7 +214,6 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
         } catch (Exception $e) {
             $this->logOptipricer(self::LOG_KEY.'_validateQuoteItem_'.$e);
         }
-
         return $error;
     }
 
@@ -226,7 +226,6 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
      */
     private function redeemCoupon($discountToken)
     {
-
         $url = $this->endPoint.self::URL_ENDPOINT_COUPON.
             self::URL_SEPARATOR.$discountToken.self::URL_SEPARATOR.self::URL_ENDPOINT_REDEEM;
 
@@ -366,7 +365,7 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
 
         $item = $this->unvalidateItemSession($item, $this->getOriginalPriceBySession($optiKeySession), $optiKeySession);
         $item->save();
-        $this->removeCookie('discount_'.$this->token.'_'.$productId);
+        $this->removeCookie(self::COOKIE_PREFIX.$this->token.'_'.$productId);
 
         return $error;
     }
@@ -385,7 +384,7 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
         //Check if ProductId is in Session Checkout (SWE_Optipricer_Coupon_ID)
         $sessionKey = self::SWE_CUSTOM_OPTION_KEY.'_'.$productId;
         $parms = array(
-            'cookieName' => 'discount_'.$this->token.'_'.$productId,
+            'cookieName' => self::COOKIE_PREFIX.$this->token.'_'.$productId,
             'originalPrice' => $product->getFinalPrice()
         );
         Mage::getSingleton('checkout/session')->setData($sessionKey, serialize($parms));
@@ -412,9 +411,9 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
             //Validate Cookie
             $cookieParams = $this->getCookieParams($this->token, $productId);
             //Product doesn't have a valid Cookie
-            if (!$cookieParams) {
+            if (!$cookieParams || $cookieParams['productId'] != $productId) {
                 $item = $this->unvalidateItemSession($item, $originalPrice, $optiKeySession);
-                $this->removeCookie('discount_'.$this->token.'_'.$productId);
+                $this->removeCookie(self::COOKIE_PREFIX.$this->token.'_'.$productId);
                 $error = $item->getName();
             }
         } else {
@@ -475,15 +474,20 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
     private function getCookieParams($token, $productId)
     {
         $result = array();
-        $cookie = $_COOKIE['discount_'.$token.'_'.$productId];
+        $cookie = $_COOKIE[self::COOKIE_PREFIX.$token.'_'.$productId];
         $dataAux = explode(':', $cookie);
         $data = $this->secureContent(json_encode($dataAux[0]), 'decrypt');
         $coupon = json_decode($data, true);
         if (is_array($coupon)) {
+            $result['productId'] = null;
             //Get CouponToken
             $result['couponToken'] = array_key_exists('token', $coupon) ? $coupon['token'] : '';
             //Get Final Price
             $result['finalPrice'] = array_key_exists('value', $coupon) ? $coupon['value'] : '';
+            //Get ProductId
+            if (array_key_exists('product', $coupon)) {
+                $result['productId'] = array_key_exists('id', $coupon['product']) ? $coupon['product']['id'] : null;
+            }
         }
         return $result;
     }
@@ -498,7 +502,7 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
      */
     private function hasCookie($token, $productId)
     {
-        return isset($_COOKIE['discount_'.$token.'_'.$productId]);
+        return isset($_COOKIE[self::COOKIE_PREFIX.$token.'_'.$productId]);
     }
 
     /**
