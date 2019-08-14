@@ -7,7 +7,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.2
+ * @version   v.0.1.3
  */
 class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
 {
@@ -237,7 +237,8 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
             'notes' => $this->products,
             'location' => ''
         );
-        $securedData['data'] = $this->secureContent(json_encode($data));
+        $secureData = Mage::helper('optipricer/Securedata');
+        $securedData['data'] = $secureData::secureContent($secureData::SECURE_CIPHER, json_encode($data), $this->key);
         $client->setRawData(json_encode($securedData));
         try {
             $response = $client->request('PUT');
@@ -476,7 +477,8 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
         $result = array();
         $cookie = $_COOKIE[self::COOKIE_PREFIX.$token.'_'.$productId];
         $dataAux = explode(':', $cookie);
-        $data = $this->secureContent(json_encode($dataAux[0]), 'decrypt');
+        $secureData = Mage::helper('optipricer/Securedata');
+        $data = $secureData::getContent($dataAux[0], $this->key);
         $coupon = json_decode($data, true);
         if (is_array($coupon)) {
             $result['productId'] = null;
@@ -529,66 +531,5 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
     public function logOptipricer($message, $level = null)
     {
         Mage::log($message, $level, 'OptipricerLogFile.log');
-    }
-
-    /**
-     * Method to manage secure content
-     *
-     * @param string $content Content
-     * @param string $task    Task
-     *
-     * @return string
-     */
-    private function secureContent($content, $task = 'encrypt')
-    {
-        if ($task == 'decrypt') {
-            $contentSecured = $this->decryptContent($this->key, $content);
-        } else {
-            $contentSecured = $this->encryptContent($this->key, $content);
-        }
-
-        return $contentSecured;
-    }
-
-    /**
-     * Encrypt content
-     *
-     * @param String $key     Key
-     * @param String $content Content
-     *
-     * @return String
-     */
-    private function encryptContent($key, $content)
-    {
-        $ivSize = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-        $iv = mcrypt_create_iv($ivSize, MCRYPT_DEV_RANDOM);
-        $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $content, MCRYPT_MODE_CBC, $iv);
-        $ciphertextArr = array('cipher' => base64_encode($ciphertext), 'iv' => base64_encode($iv));
-        $ciphertextArr = json_encode($ciphertextArr);
-        $ciphertextBase64 = base64_encode($ciphertextArr);
-
-        return $ciphertextBase64;
-    }
-
-    /**
-     * Decrypt content
-     *
-     * @param String $key    Key
-     * @param String $cipher Cipher
-     *
-     * @return String
-     */
-    private function decryptContent($key, $cipher)
-    {
-        $ciphertextDec = base64_decode($cipher);
-        $ciphertextDec = json_decode($ciphertextDec);
-        $content = trim(mcrypt_decrypt(
-            MCRYPT_RIJNDAEL_128,
-            $key,
-            base64_decode($ciphertextDec->cipher),
-            MCRYPT_MODE_CBC,
-            base64_decode($ciphertextDec->iv)
-        ));
-        return $content;
     }
 }

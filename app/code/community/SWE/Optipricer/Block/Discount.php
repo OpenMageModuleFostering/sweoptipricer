@@ -6,7 +6,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.2
+ * @version   v.0.1.3
  */
 class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements Mage_Widget_Block_Interface
 {
@@ -126,6 +126,7 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
             return $html;
         }
 
+        $secureData = Mage::helper('optipricer/Securedata');
         //get ProductDetails and other relevant data to the requests
         $data = $this->getProductDetails();
         $data['min'] = $this->minDiscount;
@@ -134,7 +135,7 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         $data['discount_render'] = $this->renderView;
         $data['expiry_offset'] = $this->expiryOffset;
         $data['social_credentials'] = array('facebookId' => '', 'facebookToken' => '');
-        $securedData['data'] = $this->secureContent(json_encode($data));
+        $securedData['data'] = $secureData::secureContent($secureData::SECURE_CIPHER, json_encode($data), $this->key);
         $securedData['social_credentials'] = $data['social_credentials'];
 
         //PageView feature
@@ -311,67 +312,5 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         if($this->maxDiscount < $this->minDiscount) {
             $this->maxDiscount = $this->minDiscount;
         }
-    }
-
-    /**
-     * Method to secure content
-     *
-     * @param String $content Content
-     * @param String $task    Task to be done
-     *
-     * @return String
-     */
-    private function secureContent($content, $task = 'encrypt')
-    {
-        if ($task == 'decrypt') {
-            $contentSecured = $this->decryptContent($this->key, $content);
-        } else {
-            $contentSecured = $this->encryptContent($this->key, $content);
-        }
-
-        return $contentSecured;
-    }
-
-    /**
-     * Encrypt content
-     *
-     * @param String $key     Key
-     * @param String $content Content
-     *
-     * @return string
-     */
-    private function encryptContent($key, $content)
-    {
-        $ivSize = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-        $iv = mcrypt_create_iv($ivSize, MCRYPT_DEV_RANDOM);
-        $ciphertext = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $content, MCRYPT_MODE_CBC, $iv);
-        $ciphertextArr = array('cipher' => base64_encode($ciphertext), 'iv' => base64_encode($iv));
-        $ciphertextArr = json_encode($ciphertextArr);
-        $ciphertextBase64 = base64_encode($ciphertextArr);
-
-        return $ciphertextBase64;
-    }
-
-    /**
-     * Decrypt content
-     *
-     * @param String $key    Key
-     * @param String $cipher Cipher
-     *
-     * @return string
-     */
-    private function decryptContent($key, $cipher)
-    {
-        $ciphertextDec = base64_decode($cipher);
-        $ciphertextDec = json_decode($ciphertextDec);
-        $content = trim(mcrypt_decrypt(
-            MCRYPT_RIJNDAEL_128,
-            $key,
-            base64_decode($ciphertextDec->cipher),
-            MCRYPT_MODE_CBC,
-            base64_decode($ciphertextDec->iv)
-        ));
-
-        return $content;
     }
 }

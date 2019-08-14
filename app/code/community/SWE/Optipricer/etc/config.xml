@@ -7,7 +7,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.2
+ * @version   v.0.1.3
  */
 -->
 <config>
@@ -76,7 +76,7 @@
     <default>
         <swe>
             <swe_group_activation>
-                <swe_endpoint>http://lh.optipricer.com:4437/api/</swe_endpoint>
+                <swe_endpoint>http://www.optipricer.com/api/</swe_endpoint>
                 <swe_enable>0</swe_enable>
             </swe_group_activation>
             <swe_group_parameters>
@@ -85,8 +85,8 @@
                 <swe_expiryoffset>2880</swe_expiryoffset>
                 <swe_min>5</swe_min>
                 <swe_max>30</swe_max>
-                <swe_background_color>660066</swe_background_color>
-                <swe_font_color>FFFFFF</swe_font_color>
+                <swe_background_color><![CDATA[660066]]></swe_background_color>
+                <swe_font_color><![CDATA[FFFFFF]]></swe_font_color>
             </swe_group_parameters>
         </swe>
     </default>
