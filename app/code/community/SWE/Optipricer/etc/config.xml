@@ -76,11 +76,11 @@
     <default>
         <swe>
             <swe_group_activation>
-                <swe_name></swe_name>
-                <swe_email></swe_email>
+                <swe_name>John</swe_name>
+                <swe_email>John@beubi.com</swe_email>
                 <swe_message></swe_message>
-                <swe_token></swe_token>
-                <swe_key></swe_key>
+                <swe_token>nest54e1c061823aa</swe_token>
+                <swe_key>c4fdfe7fd8430329ca83c214bc6a93d5</swe_key>
                 <swe_enable>1</swe_enable>
                 <swe_endpoint>http://www.optipricer.com/api/</swe_endpoint>
             </swe_group_activation>

@@ -89,7 +89,7 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
      */
     public static function getContent($content, $key = false, $publicKey = false)
     {
-        if (is_array($content)) {
+        if (is_array($content) || is_object($content)) {
             return false;
         }
 
@@ -100,8 +100,16 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
         }
 
         $data = json_decode($data);
+        if (!$data) {
+            return false;
+        }
+
         $mode = isset($data->smode) ? $data->smode : self::SECURE_CIPHER;
         if ($mode == self::SECURE_CIPHER && !isset($data->iv)) {
+            return false;
+        }
+
+        if (!isset($data->content) && !isset($data->cipher)) {
             return false;
         }
         $obj = isset($data->content) ? $data->content : $data->cipher;
@@ -112,10 +120,12 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
                 return self::decryptContent($key, $data);
                 break;
             case self::SECURE_SIGN:
-                if(self::verifySignature($publicKey, $data))
+                if(self::verifySignature($publicKey, $data)) {
                     return $obj;
-                else
+                }
+                else {
                     return false;
+                }
                 break;
             case self::SECURE_CIPHER_SIGN:
                 return self::decryptVerifyContent($key, $publicKey, $data);
@@ -136,27 +146,30 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
     private static function encryptContent($key, $content)
     {
         $ivSize = mcrypt_get_iv_size(self::CIPHER_ALG, self::CIPHER_MODE);
-        $iv = '';
-        if($ivSize > 0)
-            $iv = mcrypt_create_iv($ivSize, MCRYPT_DEV_URANDOM);
+        $iv = $ivSize > 0 ? mcrypt_create_iv($ivSize, MCRYPT_DEV_URANDOM) : '';
 
         // creates a cipher text compatible with AES (Rijndael block size = 128) to keep the text confidential
         // only suitable for encoded input that never ends with value 00h (because of default zero padding)
-        $cipherText = mcrypt_encrypt(self::CIPHER_ALG, $key, $content, self::CIPHER_MODE, $iv);
+        try {
+            $cipherText = mcrypt_encrypt(self::CIPHER_ALG, $key, $content, self::CIPHER_MODE, $iv);
+        } catch(\Exception $e) {
+            return false;
+        }
+
+        $hashedKey = hash('sha256', $key);
+
+        $hmac = hash_hmac('sha256', base64_encode($cipherText) . base64_encode($iv), $hashedKey);
 
         // prepend the IV for it to be available for decryption
         $cipherTextArray = array(
             'content' => base64_encode($cipherText),
             'iv'      => base64_encode($iv),
+            'hmac'    => $hmac,
             'alg'     => self::CIPHER_ALG_MODE,
             'smode'   => self::SECURE_CIPHER
         );
 
-        $cipherTextArray = json_encode($cipherTextArray);
-
-        // encode the resulting cipher text so it can be represented by a string
-        // could be commented...
-        $cipherTextArray = base64_encode($cipherTextArray);
+        $cipherTextArray = base64_encode(json_encode($cipherTextArray));
 
         return $cipherTextArray;
     }
@@ -171,44 +184,41 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
      */
     private static function decryptContent($key, $data)
     {
+        if (!is_object($data)) {
+            return false;
+        }
         $cipherAlg  = self::CIPHER_ALG;
         $cipherMode = self::CIPHER_MODE;
 
-        if(isset($data->alg))
-        {
+        if (isset($data->alg)) {
+            if (!array_key_exists($data->alg, self::$cipherArray)) {
+                return false;
+            }
             $cipherAlg  = self::$cipherArray[$data->alg]['alg'];
             $cipherMode = self::$cipherArray[$data->alg]['mode'];
         }
         $cipher  = isset($data->content) ? $data->content : $data->cipher;
+        $cipher  = str_replace(' ', '+',$cipher);
 
-        $content = mcrypt_decrypt($cipherAlg, $key, base64_decode(str_replace(' ', '+',$cipher)), $cipherMode, base64_decode(str_replace(' ', '+',$data->iv)));
+        $iv = str_replace(' ', '+',$data->iv);
+
+        if(!isset($data->hmac))
+            return false;
+
+        $hashedKey = hash('sha256', $key);
+
+        $newHmac = hash_hmac('sha256', $cipher . $iv, $hashedKey);
+
+        if($newHmac !== $data->hmac)
+            return false;
+
+        try {
+            $content = mcrypt_decrypt($cipherAlg, $key, base64_decode($cipher), $cipherMode, base64_decode($iv));
+        } catch (\Exception $e) {
+            return false;
+        }
 
         return $content;
-    }
-
-
-    /**
-     * Method to sign content
-     *
-     * @param string $privateKey Private Key
-     * @param string $content    Content
-     *
-     * @return array|string
-     */
-    private static function signContent($privateKey, $content)
-    {
-        openssl_sign($content, $signature, $privateKey, self::SIGN_ALG);
-        $obj = array(
-            'content' => $content,
-            'alg'     => self::SIGN_ALG,
-            'smode'   => self::SECURE_SIGN,
-            'sign'    => base64_encode($signature)
-        );
-
-        $obj = json_encode($obj);
-        //$obj = base64_encode($obj);
-
-        return $obj;
     }
 
     /**
@@ -221,56 +231,23 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
      */
     private static function verifySignature($publicKey, $content)
     {
+        if (!is_object($content)) {
+            return false;
+        }
         $signAlg = isset($content->alg) ? $content->alg : self::SIGN_ALG;
 
         if (isset($content->content) && isset($content->sign)) {
             //int 1 if the signature is correct, 0 if it is incorrect, and -1 on error.
-            $cnt = is_object($content->content) ? json_encode($content->content) : $content->content;
-            $result = openssl_verify($cnt, base64_decode(str_replace(" ", "+",$content->sign)), $publicKey, $signAlg);
-
-            return $result == 1;
+            $obj = is_object($content->content) ? json_encode($content->content) : $content->content;
+            try {
+                $result = openssl_verify($obj, base64_decode($content->sign), $publicKey, $signAlg);
+                return $result == 1;
+            } catch (\Exception $e) {
+                return false;
+            }
         } else {
             return false;
         }
-    }
-
-    /**
-     * Method to encrypt and sign content
-     *
-     * @param string $key     Shared Key
-     * @param string $privKey Private Key
-     * @param string $content Content
-     *
-     * @return array|string
-     */
-    private static function encryptSignContent($key, $privKey, $content)
-    {
-        openssl_sign($content, $signature, $privKey, self::SIGN_ALG);
-
-        $ivSize = mcrypt_get_iv_size(self::CIPHER_ALG, self::CIPHER_MODE);
-
-        $iv = '';
-        if($ivSize > 0)
-            $iv = mcrypt_create_iv($ivSize, MCRYPT_DEV_URANDOM);
-
-        // creates a cipher text compatible with AES (Rijndael block size = 128) to keep the text confidential
-        // only suitable for encoded input that never ends with value 00h (because of default zero padding)
-        $ciphertext = mcrypt_encrypt(self::CIPHER_ALG, $key, $content, self::CIPHER_MODE, $iv);
-
-        $obj = array(
-            'content' => base64_encode($ciphertext),
-            'iv'      => base64_encode($iv),
-            'alg'     => self::CIPHER_ALG_MODE . '|' . self::SIGN_ALG,
-            'smode'   => self::SECURE_CIPHER_SIGN,
-            'sign'    => base64_encode($signature)
-        );
-
-        $obj = json_encode($obj);
-
-        //is it really necessary?
-        //$obj = base64_encode($obj);
-
-        return $obj;
     }
 
     /**
@@ -284,32 +261,44 @@ class SWE_Optipricer_Helper_Securedata extends Mage_Core_Helper_Abstract
      */
     private static function decryptVerifyContent($key, $pubKey, $content)
     {
+        if (!is_object($content) || !isset($content->sign) || !isset($content->iv)) {
+            return false;
+        }
+        if (!isset($content->content) && !isset($content->cipher)) {
+            return false;
+        }
         $cipherAlg  = self::CIPHER_ALG;
         $cipherMode = self::CIPHER_MODE;
         $signAlg    = self::SIGN_ALG;
 
-        if(isset($content->alg))
-        {
-            $algs       = explode("|", $content->alg);
+        if (isset($content->alg)) {
+            $algs = explode("|", $content->alg);
+            if (count($algs) != 2 || !array_key_exists($algs[0], self::$cipherArray)) {
+                return false;
+            }
             $cipherAlg  = self::$cipherArray[$algs[0]]['alg'];
             $cipherMode = self::$cipherArray[$algs[0]]['mode'];
-            $signAlg    = $algs[1];
+            $signAlg    = (int) $algs[1];
         }
 
         $cipher = isset($content->content) ? $content->content : $content->cipher;
-        $data = mcrypt_decrypt(
-            $cipherAlg,
-            $key,
-            base64_decode(str_replace(' ', '+',$cipher)),
-            $cipherMode,
-            base64_decode(str_replace(' ', '+',$content->iv))
-        );
+        try {
+            $data = trim(mcrypt_decrypt(
+                $cipherAlg,
+                $key,
+                base64_decode($cipher, true),
+                $cipherMode,
+                base64_decode($content->iv, true)
+            ));
+        } catch (\Exception $e) {
+            return false;
+        }
 
-        return openssl_verify(
-            $data, 
-            base64_decode(str_replace(' ', '+',$content->sign)), 
-            $pubKey, 
-            $signAlg) ? $data : false;
+        try {
+            return openssl_verify($data, base64_decode($content->sign, true), $pubKey, $signAlg) ? $data : false;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**

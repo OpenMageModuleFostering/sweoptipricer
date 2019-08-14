@@ -6,8 +6,8 @@
     "description": "Calculate best price for each customer",
     "authors": [
     {
-        "name": "Rui Mendes",
-        "email": "rui.mendes@beubi.com"
+        "name": "beubi",
+        "email": "swe@beubi.com"
     }
 ],
     "suggest": {
