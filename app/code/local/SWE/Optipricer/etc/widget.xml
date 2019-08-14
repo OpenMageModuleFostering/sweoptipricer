@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<widgets>
+    <optipricer_discount type="optipricer/discount" translate="Optipricer Discount" module="optipricer">
+        <name>Optipricer Discount</name>
+
+        <description>Get a personalized discount</description>
+
+        <!-- Additional javascript files to be loaded
+            on the widget configuration edit form if needed. -->
+        <!--<js>mage/adminhtml/first.js,mage/adminhtml/second.js</js>-->
+
+        <!--
+            It should contain comma separated list
+            of javascript files paths under the /js directory.
+            This tag is optional.
+        -->
+
+        <parameters>
+            <enable_service translate="label">
+                <label>Enable Service</label>
+                <visible>1</visible>
+                <required>1</required>
+                <type>select</type>
+                <value>1</value>
+                <source_model>adminhtml/system_config_source_yesno</source_model>
+            </enable_service>
+            <swe_font_color translate="label">
+                <label>Font color (Button)</label>
+                <visible>1</visible>
+                <type>text</type>
+                <description>If empty, the color FFFFFF (white) will be used</description>
+            </swe_font_color>
+            <swe_background_color translate="label">
+                <label>Background color (Button)</label>
+                <visible>1</visible>
+                <type>text</type>
+              <!--  <value>5D2D87</value> -->
+                <description>If empty, the color 660066 (purple) will be used</description>
+            </swe_background_color>
+            <swe_expiryoffset translate="label">
+                <label>Expiry Offset (in minutes)</label>
+                <visible>1</visible>
+                <type>text</type>
+                <description>If empty, it uses the default value defined in the configuration.</description>
+            </swe_expiryoffset>
+            <swe_min translate="label">
+                <label>Minimum Discount </label>
+                <description>If empty, it uses the default value defined in the configuration.</description>
+                <type>text</type>
+                <visible>1</visible>
+            </swe_min>
+            <swe_max translate="label">
+                <label>Maximum Discount </label>
+                <description>If empty, it uses the default value defined in the configuration.</description>
+                <visible>1</visible>
+                <type>text</type>
+            </swe_max>
+            <template translate="label">
+                <label>Frontend Template</label>
+                <visible>1</visible>
+                <required>1</required>
+                <type>select</type>
+                <values>
+                    <button translate="label">
+                        <value>swe/optipricer/widget.phtml</value>
+                        <label>Share Button (Optipricer)</label>
+                    </button>
+                </values>
+            </template>
+        </parameters>
+    </optipricer_discount>
+</widgets>

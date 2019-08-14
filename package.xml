@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+    <name>SweOptipricer</name>
+    <version>0.1.0</version>
+    <stability>stable</stability>
+    <license uri="http://opensource.org/licenses/LGPL-3.0">GNU Lesser General Public License (LGPL)</license>
+    <channel>community</channel>
+    <extends/>
+    <summary>Calculate best price for each customer</summary>
+    <description>The extension provides a widget that uses the Optipricer API to create promotions for your products.&#xD;
+Customers will receive a discount after a successful product share on Facebook.&#xD;
+For more information www.optipricer.com</description>
+    <notes>Testing candidate</notes>
+    <authors><author><name>Rui Mendes</name><user>ruidamendes</user><email>rui.mendes@beubi.com</email></author><author><name>beubi</name><user>beubi</user><email>swe@beubi.com</email></author></authors>
+    <date>2015-02-13</date>
+    <time>18:58:31</time>
+    <contents><target name="magelocal"><dir name="SWE"><dir name="Optipricer"><dir name="Block"><file name="Button.php" hash="8ed206abaf5cb543c1ecdee14edffeb8"/><file name="Discount.php" hash="94eeb6ed1d031ce824b7979ac684e882"/></dir><dir name="Helper"><file name="Data.php" hash="d0fe8d14d8322200cd61852652572f2c"/></dir><dir name="Model"><file name="Config.php" hash="b3b4dbb1fcae77bf0b06cbb51b688269"/><file name="Observer.php" hash="0d822491b36a5a11770232bc688ba1b8"/></dir><dir name="controllers"><dir name="Adminhtml"><file name="SweoptipricerController.php" hash="a8298c06a29de784667fab43874d7bfa"/></dir></dir><dir name="etc"><file name="config.xml" hash="ac94752d4f796ccd3b9646503d15b25c"/><file name="system.xml" hash="e3c6666a5bea0b84720648ff0f8a0930"/><file name="widget.xml" hash="fbc9c4137471aaffb1d6a39d6bbaca56"/><file name=".gitignore" hash="8bbba098c1565b7ecf097c21a8df20c7"/></dir></dir></dir></target><target name="magedesign"><dir name="frontend"><dir name="base"><dir name="default"><dir name="template"><dir name="swe"><dir name="optipricer"><file name="widget.phtml" hash="d0b4396cdfc3ac7ec21cd88626935315"/></dir></dir></dir></dir></dir></dir></target><target name="mageetc"><dir name="modules"><file name="SWE_Optipricer.xml" hash="225863b467db416b4db8b754cf73efa1"/></dir></target><target name="magelocale"><dir name="en_US"><file name="SWE_Optipricer.csv" hash="2c27e6a50f20ae1318274d6fa8b17bfd"/></dir><dir name="pt_PT"><file name="SWE_Optipricer.csv" hash="7ac9dd9cf8e434d982a003789a0cd826"/></dir></target><target name="mage"><dir name="js"><dir name="swe"><file name="optialert.min.js" hash="d819c38f0c3c8ef8a084154da96667eb"/><file name="optipricer.min.js" hash="5fad2fc014c5d54956a4ade5c05c7681"/><file name="optispin.min.js" hash="f2b0a61b3a739d03e88401e2a1163588"/></dir></dir></target><target name="mageskin"><dir name="adminhtml"><dir name="default"><dir name="default"><dir name="template"><dir name="swe"><dir name="optipricer"><dir name="system"><dir name="config"><file name="button.phtml" hash=""/></dir></dir></dir></dir></dir></dir></dir></dir></target></contents>
+    <compatible/>
+    <dependencies><required><php><min>5.3.10</min><max>6.0.0</max></php></required></dependencies>
+</package>
