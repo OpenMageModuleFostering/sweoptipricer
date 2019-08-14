@@ -6,7 +6,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.3
+ * @version   v.0.1.2
  */
 class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements Mage_Widget_Block_Interface
 {
@@ -135,6 +135,7 @@ class SWE_Optipricer_Block_Discount extends Mage_Core_Block_Template implements 
         $data['discount_render'] = $this->renderView;
         $data['expiry_offset'] = $this->expiryOffset;
         $data['social_credentials'] = array('facebookId' => '', 'facebookToken' => '');
+        $data['ssid'] = $secureData::generateSessionID(Mage::getSingleton("core/session")->getEncryptedSessionId());
         $securedData['data'] = $secureData::secureContent($secureData::SECURE_CIPHER, json_encode($data), $this->key);
         $securedData['social_credentials'] = $data['social_credentials'];
 

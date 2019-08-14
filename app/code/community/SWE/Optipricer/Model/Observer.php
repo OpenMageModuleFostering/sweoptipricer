@@ -7,7 +7,7 @@
  * @author    Ubiprism Lda. / be.ubi <contact@beubi.com>
  * @copyright 2015 be.ubi
  * @license   GNU Lesser General Public License (LGPL)
- * @version   v.0.1.3
+ * @version   v.0.1.2
  */
 class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
 {
@@ -476,10 +476,32 @@ class SWE_Optipricer_Model_Observer extends Varien_Event_Observer
     {
         $result = array();
         $cookie = $_COOKIE[self::COOKIE_PREFIX.$token.'_'.$productId];
-        $dataAux = explode(':', $cookie);
+
+        @json_decode(stripslashes($cookie));
+
+        if(json_last_error() !== JSON_ERROR_NONE)
+        {
+            $couponArr = explode(':', $cookie);
+            $dataAux = $couponArr[0];
+        }
+        else
+            $dataAux = stripslashes($cookie);
+
         $secureData = Mage::helper('optipricer/Securedata');
-        $data = $secureData::getContent($dataAux[0], $this->key);
-        $coupon = json_decode($data, true);
+        $data = $secureData::getContent($dataAux, $this->key, $secureData::getOptipricerKey());
+
+        if(!$data)
+            return false;
+
+        $coupon = is_object($data) ? json_decode(json_encode($data),true) : json_decode($data, true);
+
+
+        if( isset($coupon['ssid']) &&
+            !$secureData::verifySessionID(
+                $coupon['ssid'],
+                Mage::getSingleton("core/session")->getEncryptedSessionId()))
+            return false;
+
         if (is_array($coupon)) {
             $result['productId'] = null;
             //Get CouponToken
