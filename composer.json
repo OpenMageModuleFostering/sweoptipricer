@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/SweOptipricer",
+    "name": "OpenMageModuleFostering\/SweOptipricer",
     "type": "magento-module",
     "license": "GNU-Lesser-General-Public-License-(LGPL)",
     "homepage": "",
     "description": "Calculate best price for each customer",
     "authors": [
-    {
-        "name": "beubi",
-        "email": "swe@beubi.com"
-    }
-],
+        {
+            "name": "beubi",
+            "email": "swe@beubi.com"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
